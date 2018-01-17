@@ -7,10 +7,21 @@
 
 namespace genericga {
 
-template <class In, class Out> struct StrategySelector {
+template <class In, class Out> class StrategySelector {
 public:
   virtual std::vector<std::shared_ptr<GAStrategy<In, Out>>>
-  Select(const std::vector<std::shared_ptr<GAStrategy<In, Out>>> strats);
+  Select(std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats, int n);
+
+  std::vector<std::shared_ptr<GAStrategy<In, Out>>>
+  Select(const std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats,
+         const std::vector<int> &indices) {
+    int size = strats->size();
+    std::vector<std::shared_ptr<GAStrategy<In, Out>>> out_vec(size);
+    for (int i = 0; i < size; ++i) {
+      out_vec.push_back(strats[indices[i]]);
+    }
+    return out_vec;
+  }
 };
 } // namespace genericga
 

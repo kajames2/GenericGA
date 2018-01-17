@@ -1,8 +1,8 @@
 #ifndef _ROULETTE_SELECTOR_H_
 #define _ROULETTE_SELECTOR_H_
 
-#include "weighted_strategy_selector.h"
 #include "ga_strategy.h"
+#include "random_selector.h"
 #include <algorithm>
 #include <memory>
 #include <random>
@@ -10,22 +10,21 @@
 
 namespace genericga {
 
-template <class In, class Out> struct RouletteSelector : public WeightedStrategySelector<In, Out> {
+template <class In, class Out>
+class RouletteSelector : public RandomSelector<In, Out> {
 public:
-  RouletteSelector() : WeightedStrategySelector<In, Out>() {}
-  explicit RouletteSelector(int seed) : WeightedStrategySelector<In, Out>(seed) {}
+  RouletteSelector() : RandomSelector<In, Out>() {}
+  explicit RouletteSelector(int seed) : RandomSelector<In, Out>(seed) {}
 
   virtual std::vector<double> CalculateWeights(
-      std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats) const override {
-    std::vector<double> weights(strats->size());
-    for(int i=0; i<weights.size(); ++i) {
-      weights[i] = (*strats)[i]->fitness;
+      std::vector<std::shared_ptr<GAStrategy<In, Out>>> strats) const override {
+    int size = strats->size();
+    std::vector<double> weights(size);
+    for (int i = 0; i < size; ++i) {
+      weights.push_back((*strats)[i]->fitness);
     }
     return weights;
   }
-
-private:
-  std::mt19937 gen_;
 };
 } // namespace genericga
 
