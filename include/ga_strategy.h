@@ -2,11 +2,11 @@
 #define _GA_STRATEGY_H_
 
 namespace genericga {
-template <class Genotype, class Phenotype> struct GAStrategy {
+template <class Gen, class Phen> struct GAStrategy {
 public:
-  GAStrategy(Genotype genotype, Phenotype phenotype, double fitness);
-  Genotype genotype;
-  Phenotype phenotype;
+  GAStrategy(Gen genotype, Phen phenotype, double fitness);
+  Gen genotype;
+  Phen phenotype;
   double fitness;
 
   bool operator<(const GAStrategy other) const {

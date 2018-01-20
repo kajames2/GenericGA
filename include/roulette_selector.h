@@ -1,30 +1,41 @@
 #ifndef _ROULETTE_SELECTOR_H_
 #define _ROULETTE_SELECTOR_H_
 
-#include "ga_strategy.h"
-#include "random_selector.h"
-#include <algorithm>
+#include "population.h"
+#include "strategy_selector.h"
 #include <memory>
 #include <random>
 #include <vector>
 
 namespace genericga {
 
-template <class In, class Out>
-class RouletteSelector : public RandomSelector<In, Out> {
+template <class Gen, class Phen>
+class RouletteSelector : public StrategySelector<Gen, Phen> {
 public:
-  RouletteSelector() : RandomSelector<In, Out>() {}
-  explicit RouletteSelector(int seed) : RandomSelector<In, Out>(seed) {}
+  RouletteSelector() : gen_(std::random_device()()) {}
+  explicit RouletteSelector(int seed) : gen_(seed) {}
 
-  virtual std::vector<double> CalculateWeights(
-      std::vector<std::shared_ptr<GAStrategy<In, Out>>> strats) const override {
-    int size = strats->size();
-    std::vector<double> weights(size);
-    for (int i = 0; i < size; ++i) {
-      weights.push_back((*strats)[i]->fitness);
+protected:
+  virtual std::vector<double>
+  CalculateWeights(Population<Gen, Phen> *pop) const;
+
+  std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
+    auto weights = CalculateWeights();
+    auto base_weights = pop->GetCounts();
+    for (int i = 0; i < weights.size(); ++i) {
+      weights[i] *= base_weights[i];
     }
-    return weights;
+
+    std::discrete_distribution<> dist(weights.begin(), weights.end());
+    std::vector<int> ind_vec(n);
+    for (int i = 0; i < n; ++i) {
+      ind_vec[i] = dist(gen_);
+    }
+    return ind_vec;
   }
+
+private:
+  std::mt19937 gen_;
 };
 } // namespace genericga
 

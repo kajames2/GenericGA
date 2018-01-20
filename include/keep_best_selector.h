@@ -8,19 +8,18 @@
 
 namespace genericga {
 
-template <class In, class Out>
-class KeepBestSelector : public StrategySelector<In, Out> {
+template <class Gen, class Phen>
+class KeepBestSelector : public StrategySelector<Gen, Phen> {
 public:
   KeepBestSelector() {}
-  std::vector<std::shared_ptr<GAStrategy<In, Out>>>
-  Select(std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats,
-         int n) override {
-    std::vector<std::shared_ptr<GAStrategy<In, Out>>> out_vec(n);
-    std::sort(strats->begin(), strats->end());
-    std::copy(strats->rbegin(), strats->rbegin() + n, out_vec.begin());
-    return out_vec;
+  std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
+    std::vector<int> ind_vec(n);
+    pop->Sort();
+    for (int i = pop->size() - n; i < pop->size(); ++i) {
+      ind_vec.push_back(i);
+    }
+    return ind_vec;
   }
-
 };
 } // namespace genericga
 

@@ -1,8 +1,8 @@
 #ifndef _ROULETTE_ZEROED_SELECTOR_H_
 #define _ROULETTE_ZEROED_SELECTOR_H_
 
-#include "random_selector.h"
-#include "ga_strategy.h"
+#include "population.h"
+#include "roulette_selector.h"
 #include <algorithm>
 #include <memory>
 #include <random>
@@ -10,20 +10,17 @@
 
 namespace genericga {
 
-template <class In, class Out> class RouletteZeroedSelector : public RandomSelector<In, Out> {
+template <class Gen, class Phen>
+class RouletteZeroedSelector : public RouletteSelector<Gen, Phen> {
 public:
-  RouletteZeroedSelector() : RandomSelector<In, Out>() {}
-  explicit RouletteZeroedSelector(int seed) : RandomSelector<In, Out>(seed) {}
+  RouletteZeroedSelector() : RouletteSelector<Gen, Phen>() {}
+  explicit RouletteZeroedSelector(int seed) : RouletteSelector<Gen, Phen>(seed) {}
 
-  virtual std::vector<double> CalculateWeights(
-      std::vector<std::shared_ptr<GAStrategy<In, Out>>> strats) const override {
-    int size = strats->size();
-    std::vector<double> weights(size);
-    for(int i=0; i<size; ++i) {
-      weights.push_back((*strats)[i]->fitness);
-    }
+  virtual std::vector<double>
+  CalculateWeights(Population<Gen, Phen> *pop) const override {
+    auto weights = pop->GetFitnesses();
     auto min = std::min_element(std::begin(weights), std::end(weights));
-    for(auto it = weights.begin();  it != weights.end(); ++it) {
+    for (auto it = weights.begin(); it != weights.end(); ++it) {
       *it -= *min;
     }
     return weights;

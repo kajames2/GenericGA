@@ -6,9 +6,9 @@
 
 namespace genericga {
 
-template <class Genotype, class Phenotype> class Population {
+template <class Gen, class Phen> class Population {
 public:
-  using Strategy = GAStrategy<Genotype, Phenotype>;
+  using Strategy = GAStrategy<Gen, Phen>;
   Population(const std::vector<Strategy> strats);
   SelectStrats(const StrategySelector &) {}
 

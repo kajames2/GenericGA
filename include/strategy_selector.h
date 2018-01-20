@@ -1,27 +1,30 @@
 #ifndef _STRATEGY_SELECTOR_H_
 #define _STRATEGY_SELECTOR_H_
 
-#include "ga_strategy.h"
+#include "population.h"
 #include <memory>
 #include <vector>
+#include <map>
+#include <algorithm>
 
 namespace genericga {
 
-template <class In, class Out> class StrategySelector {
+template <class Gen, class Phen> class StrategySelector {
 public:
-  virtual std::vector<std::shared_ptr<GAStrategy<In, Out>>>
-  Select(std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats, int n);
-
-  std::vector<std::shared_ptr<GAStrategy<In, Out>>>
-  Select(const std::vector<std::shared_ptr<GAStrategy<In, Out>>> *strats,
-         const std::vector<int> &indices) {
-    int size = strats->size();
-    std::vector<std::shared_ptr<GAStrategy<In, Out>>> out_vec(size);
-    for (int i = 0; i < size; ++i) {
-      out_vec.push_back(strats[indices[i]]);
+  virtual std::map<int, int> Select(Population<Gen, Phen> *strats, int n) {
+    std::map<int, int> index_counts;
+    auto indices = SelectIndices(strats, n);
+    for (auto i : indices) {
+      auto loc = std::find(index_counts.begin(), index_counts.end(), i);
+      if(loc == index_counts.end()) {
+        index_counts.emplace(i, 1);
+      } else {
+        index_counts[i]++;
+      }
     }
-    return out_vec;
   }
+ protected:
+    virtual std::vector<int> SelectIndices(Population<Gen, Phen> *strats, int n);
 };
 } // namespace genericga
 

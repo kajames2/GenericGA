@@ -1,35 +1,43 @@
 #ifndef _RANKED_SELECTOR_H_
 #define _RANKED_SELECTOR_H_
 
-#include "ga_strategy.h"
-#include "random_selector.h"
-#include <algorithm>
-#include <memory>
+#include "population.h"
+#include "roulette_selector.h"
 #include <vector>
 
 namespace genericga {
 
-template <class In, class Out>
-class RankedSelector : public RandomSelector<In, Out> {
+template <class Gen, class Phen>
+class RankedSelector : public RouletteSelector<Gen, Phen> {
 public:
-  explicit RankedSelector(double weight)
-      : weight_(weight), RandomSelector<In, Out>() {}
-  explicit RankedSelector(double weight, int seed)
-      : weight_(weight), RandomSelector<In, Out>(seed) {}
-  virtual std::vector<double> CalculateWeights(
-      std::vector<std::shared_ptr<const GAStrategy<In, Out>>> *strats) const {
-    int size = strats->size();
-    std::sort(strats->begin(), strats->end());
-    std::vector<double> out_vec(strats->size());
+  explicit RankedSelector()
+      : RouletteSelector<Gen, Phen>() {}
+  RankedSelector(int seed)
+      : RouletteSelector<Gen, Phen>(seed) {}
+
+ protected:
+  std::vector<double> CalculateRanks(Population<Gen, Phen> *pop) const {
+    int size = pop->size();
+    pop->Sort();
+    std::vector<double> out_vec(size);
+    auto counts = pop->GetCounts();
+    auto fitnesses = pop->GetFitnesses();
+    int low_count = 0;
+    int count = 0;
+    int n_equal = 0;
     for (int i = 0; i < size; ++i) {
-      out_vec.push_back((2 - weight_) / size +
-                        (2 * i * (weight_ - 1)) / (size * (size - 1)));
+      count += counts[i];
+      n_equal++;
+      if (i == size - 1 || fitnesses[i + 1] != fitnesses[i]) {
+        for (int j = 0; j < n_equal; ++j) {
+          out_vec.push_back((count + low_count - 1) / 2.0);
+        }
+        low_count = count;
+        n_equal = 0;
+      }
     }
     return out_vec;
   }
-
-private:
-  double weight_;
 };
 } // namespace genericga
 
