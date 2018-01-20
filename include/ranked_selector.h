@@ -21,7 +21,7 @@ public:
     pop->Sort();
     std::vector<double> out_vec(size);
     auto counts = pop->GetCounts();
-    auto fitnesses = pop->GetFitnesses();
+    auto fitnesses = pop->GetUniqueFitnesses();
     int low_count = 0;
     int count = 0;
     int n_equal = 0;

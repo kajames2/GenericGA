@@ -18,7 +18,7 @@ public:
 
   virtual std::vector<double>
   CalculateWeights(Population<Gen, Phen> *pop) const override {
-    auto weights = pop->GetFitnesses();
+    auto weights = pop->GetUniqueFitnesses();
     auto min = std::min_element(std::begin(weights), std::end(weights));
     for (auto it = weights.begin(); it != weights.end(); ++it) {
       *it -= *min;

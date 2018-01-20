@@ -2,7 +2,6 @@
 #define _KEEP_BEST_SELECTOR_H_
 
 #include "strategy_selector.h"
-#include <memory>
 #include <random>
 #include <vector>
 
@@ -12,13 +11,18 @@ template <class Gen, class Phen>
 class KeepBestSelector : public StrategySelector<Gen, Phen> {
 public:
   KeepBestSelector() {}
-  std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
-    std::vector<int> ind_vec(n);
+  std::map<int, int> Select(Population<Gen, Phen> *pop, int n) override {
+    std::map<int, int> index_counts;
     pop->Sort();
-    for (int i = pop->size() - n; i < pop->size(); ++i) {
-      ind_vec.push_back(i);
+    auto counts = pop->GetCounts();
+    auto i = counts.size() - 1;
+    auto rem_count = n;
+    while (rem_count > 0 && i >= 0) {
+      int n_add = std::min(n, counts[i]);
+      index_counts.emplace(i, n_add);
+      rem_count -= n_add;
     }
-    return ind_vec;
+    return index_counts;
   }
 };
 } // namespace genericga

@@ -19,7 +19,7 @@ public:
 
   virtual std::vector<double>
   CalculateWeights(Population<Gen, Phen> *pop) const override {
-    return pop->GetFitnesses();
+    return pop->GetUniqueFitnesses();
   }
 };
 } // namespace genericga
