@@ -3,6 +3,7 @@
 
 #include "population.h"
 #include "strategy_selector.h"
+#include "vector_ops.h"
 #include <random>
 #include <vector>
 
@@ -16,20 +17,25 @@ public:
   TournamentSelector(int tourn_size, int seed)
       : tourn_size_(tourn_size), gen_(seed) {}
   std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
-    pop->Sort();
+    auto fitnesses = pop->GetUniqueFitnesses();
     auto counts = pop->GetCounts();
     dist = std::discrete_distribution<>(counts.begin(), counts.end());
     std::vector<int> ind_vec(n);
     for (int i = 0; i < n; ++i) {
-      ind_vec.push_back(TournamentRound());
+      ind_vec.push_back(TournamentRound(fitnesses));
     }
     return ind_vec;
   }
 
-  int TournamentRound() { return TournamentRound(GenerateTournamentIndices()); }
+  int TournamentRound(const std::vector<double> &fitnesses) {
+    return TournamentRound(GenerateTournamentIndices());
+  }
 
-  int TournamentRound(std::vector<int> indices) {
-    return *std::max_element(indices.begin(), indices.end());
+  int TournamentRound(const std::vector<double> &fitnesses,
+                      std::vector<int> indices) {
+    return *std::max_element(
+        indices.begin(), indices.end(),
+        [&fitnesses](int i1, int i2) { return fitnesses[i1] < fitnesses[i2]; });
   }
 
   std::vector<int> GenerateTournamentIndices() {

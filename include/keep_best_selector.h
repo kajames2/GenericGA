@@ -1,6 +1,8 @@
 #ifndef _KEEP_BEST_SELECTOR_H_
 #define _KEEP_BEST_SELECTOR_H_
 
+#include "population.h"
+#include "vector_ops.h"
 #include "strategy_selector.h"
 #include <random>
 #include <vector>
@@ -11,15 +13,15 @@ template <class Gen, class Phen>
 class KeepBestSelector : public StrategySelector<Gen, Phen> {
 public:
   KeepBestSelector() {}
-  std::map<int, int> Select(Population<Gen, Phen> *pop, int n) override {
+  std::map<int, int> SelectIndexCounts(Population<Gen, Phen> *pop, int n) override {
     std::map<int, int> index_counts;
-    pop->Sort();
+    auto ordering = GetRankings(GetRankings(pop->GetUniqueFitnesses()));
     auto counts = pop->GetCounts();
-    auto i = counts.size() - 1;
+    auto it = ordering.rbegin()
     auto rem_count = n;
-    while (rem_count > 0 && i >= 0) {
-      int n_add = std::min(n, counts[i]);
-      index_counts.emplace(i, n_add);
+    while (it != ordering.rend() && rem_count > 0) {
+      int n_add = std::min(rem_count, counts[*it]);
+      index_counts.emplace(*it, n_add);
       rem_count -= n_add;
     }
     return index_counts;

@@ -5,8 +5,8 @@ namespace genericga {
 
 template <class Gen> class Crossover {
 public:
-  virtual void Crossover(Gen *genotype1, Gen *genotype2);
+  virtual void Cross(Gen *genotype1, Gen *genotype2);
 };
 } // namespace genericga
 
-#endif // _MUTATOR_H_
+#endif // _CROSSOVER_H_

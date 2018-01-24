@@ -1,30 +1,38 @@
 #ifndef _STRATEGY_SELECTOR_H_
 #define _STRATEGY_SELECTOR_H_
 
+#include "vector_ops.h"
 #include "population.h"
+#include <algorithm>
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
-#include <algorithm>
 
 namespace genericga {
 
 template <class Gen, class Phen> class StrategySelector {
 public:
-  virtual std::map<int, int> Select(Population<Gen, Phen> *strats, int n) {
-    std::map<int, int> index_counts;
-    auto indices = SelectIndices(strats, n);
-    for (auto i : indices) {
-      auto loc = std::find(index_counts.begin(), index_counts.end(), i);
-      if(loc == index_counts.end()) {
-        index_counts.emplace(i, 1);
-      } else {
-        index_counts[i]++;
-      }
-    }
+public:
+  virtual Population<Gen, Phen>
+  SelectPopulation(const Population<Gen, Phen> &pop, int n) {
+    return pop.GetPopulation(SelectIndexCounts(pop, n));
   }
- protected:
-    virtual std::vector<int> SelectIndices(Population<Gen, Phen> *strats, int n);
+
+  virtual std::vector<GAStrategy<Gen, Phen>>
+  SelectStrategies(const Population<Gen, Phen> &pop, int n) {
+    pop.GetStrategies(SelectIndicies(pop, n));
+  }
+
+protected:
+  virtual std::vector<int> SelectIndices(const Population<Gen, Phen> &pop,
+                                         int n) {
+    return CountsToVector(SelectIndexCounts(pop, n));
+  }
+  
+  virtual std::map<int, int> SelectIndexCounts(const Population<Gen, Phen> &pop,
+                                               int n) {
+    return VectorToCounts(SelectIndices(pop, n));
+  }
 };
 } // namespace genericga
 

@@ -16,7 +16,7 @@ public:
       : weight_(weight), RankedSelector<Gen, Phen>(seed) {}
   std::vector<double>
   CalculateWeights(Population<Gen, Phen> *pop) const override {
-    auto ranks = CalculateRanks(pop);
+    auto ranks = CalculateAverageRanks(pop);
     int size = pop->GetNStrategies();
     std::vector<double> out_vec(ranks->size());
     for (auto rank : ranks) {

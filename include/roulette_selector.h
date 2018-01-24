@@ -25,7 +25,6 @@ protected:
     for (int i = 0; i < weights.size(); ++i) {
       weights[i] *= base_weights[i];
     }
-
     std::discrete_distribution<> dist(weights.begin(), weights.end());
     std::vector<int> ind_vec(n);
     for (int i = 0; i < n; ++i) {
