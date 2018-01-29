@@ -15,20 +15,21 @@ public:
   RouletteSelector() : gen_(std::random_device()()) {}
   explicit RouletteSelector(int seed) : gen_(seed) {}
 
-protected:
   virtual std::vector<double>
-  CalculateWeights(Population<Gen, Phen> *pop) const;
+  CalculateWeights(const Population<Gen, Phen> &pop) const = 0;
 
-  std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
-    auto weights = CalculateWeights();
-    auto base_weights = pop->GetCounts();
+  std::vector<int> SelectIndices(const Population<Gen, Phen> &pop,
+                                 int n) override {
+    auto weights = CalculateWeights(pop);
+    auto base_weights = pop.GetFrequencies();
     for (int i = 0; i < weights.size(); ++i) {
       weights[i] *= base_weights[i];
     }
     std::discrete_distribution<> dist(weights.begin(), weights.end());
-    std::vector<int> ind_vec(n);
+    std::vector<int> ind_vec;
+    ind_vec.reserve(n);
     for (int i = 0; i < n; ++i) {
-      ind_vec[i] = dist(gen_);
+      ind_vec.push_back(dist(gen_));
     }
     return ind_vec;
   }

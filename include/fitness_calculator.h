@@ -5,7 +5,7 @@ namespace genericga {
 
 template <class Phen> class FitnessCalculator {
 public:
-  virtual double CalculateFitness(Phen *phenotype);
+  virtual double CalculateFitness(const Phen &phenotype);
 };
 } // namespace genericga
 

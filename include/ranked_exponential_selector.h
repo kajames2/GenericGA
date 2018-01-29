@@ -15,9 +15,10 @@ public:
   explicit RankedExponentialSelector(int seed)
       : RankedSelector<Gen, Phen>(seed) {}
   std::vector<double>
-  CalculateWeights(Population<Gen, Phen> *pop) const override {
-    auto ranks = CalculateAverageRanks(pop);
-    std::vector<double> out_vec(ranks.size());
+  CalculateWeights(const Population<Gen, Phen> &pop) const override {
+    auto ranks = this->CalculateAverageRanks(pop);
+    std::vector<double> out_vec;
+    out_vec.reserve(ranks.size());
     for (auto rank : ranks) {
       out_vec.push_back(1 - std::exp(-rank));
     }

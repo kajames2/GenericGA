@@ -7,13 +7,8 @@ namespace gatests {
 
 class SamplePhenotypeConverter
     : public genericga::PhenotypeConverter<int, int> {
-public:
-  explicit SamplePhenotypeConverter(int n) : n_(n) {}
-  int Convert(const int &genotype) override { return n_ - genotype * genotype; }
-
-private:
-  int n_;
-};
+  int Convert(int genotype) override { return 5 - genotype * genotype; }
+}
 
 } // namespace gatests
 

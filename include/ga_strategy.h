@@ -3,21 +3,27 @@
 
 #include "fitness_calculator.h"
 #include "phenotype_converter.h"
+#include <utility>
 
 namespace genericga {
 template <class Gen, class Phen> struct GAStrategy {
 public:
   GAStrategy(Gen genotype);
-  GAStrategy(Gen genotype, FitnessCalculator<Phen> *fitness_calc,
-             PhenotypeConverter<Gen, Phen> *phen_conv);
+  GAStrategy(Gen genotype, PhenotypeConverter<Gen, Phen> *phen_conv,
+             FitnessCalculator<Phen> *fitness_calc);
   void SetPhenotypeConverter(PhenotypeConverter<Gen, Phen> *phen_conv);
   void SetFitnessCalculator(FitnessCalculator<Phen> *fitness_calc);
   double GetFitness() const;
   Phen GetPhenotype() const;
-  bool operator<(const GAStrategy other) const;
   Gen GetGenotype() const;
   void SetGenotype(const Gen &gen);
-
+  bool operator==(const GAStrategy &other) const;
+  bool operator!=(const GAStrategy &other) const;
+  bool operator<(const GAStrategy &other) const;
+  bool operator<=(const GAStrategy &other) const;
+  bool operator>(const GAStrategy &other) const;
+  bool operator>=(const GAStrategy &other) const;
+  
 private:
   Gen genotype_;
   Phen mutable phenotype_;
@@ -40,8 +46,8 @@ GAStrategy<Gen, Phen>::GAStrategy(Gen genotype)
 
 template <class Gen, class Phen>
 GAStrategy<Gen, Phen>::GAStrategy(Gen genotype,
-                                  FitnessCalculator<Phen> *fitness_calc,
-                                  PhenotypeConverter<Gen, Phen> *phen_conv)
+                                  PhenotypeConverter<Gen, Phen> *phen_conv,
+                                  FitnessCalculator<Phen> *fitness_calc)
     : genotype_(genotype), has_phenotype_(false), has_fitness_(false) {
   SetFitnessCalculator(fitness_calc);
   SetPhenotypeConverter(phen_conv);
@@ -79,8 +85,33 @@ Phen GAStrategy<Gen, Phen>::GetPhenotype() const {
 }
 
 template <class Gen, class Phen>
-bool GAStrategy<Gen, Phen>::operator<(const GAStrategy other) const {
+bool GAStrategy<Gen, Phen>::operator<(const GAStrategy &other) const {
   return genotype_ < other.genotype_;
+}
+
+template <class Gen, class Phen>
+bool GAStrategy<Gen, Phen>::operator<=(const GAStrategy &other) const {
+  return genotype_ <= other.genotype_;
+}
+
+template <class Gen, class Phen>
+bool GAStrategy<Gen, Phen>::operator>(const GAStrategy &other) const {
+  return genotype_ > other.genotype_;
+}
+
+template <class Gen, class Phen>
+bool GAStrategy<Gen, Phen>::operator>=(const GAStrategy &other) const {
+  return genotype_ >= other.genotype_;
+}
+
+template <class Gen, class Phen>
+bool GAStrategy<Gen, Phen>::operator==(const GAStrategy &other) const {
+  return genotype_ == other.genotype_;
+}
+
+template <class Gen, class Phen>
+bool GAStrategy<Gen, Phen>::operator!=(const GAStrategy &other) const {
+  return genotype_ != other.genotype_;
 }
 
 template <class Gen, class Phen>

@@ -10,6 +10,7 @@
 #include <memory>
 #include <numeric>
 #include <vector>
+#include <iostream>
 
 namespace genericga {
 
@@ -28,6 +29,9 @@ public:
   std::vector<int> GetFrequencies() const;
   void AddStrategies(std::vector<GAStrategy<Gen, Phen>> strats);
   void AddStrategies(const Population<Gen, Phen> &pop);
+  void AddStrategies(const std::vector<GAStrategy<Gen, Phen>> &sorted_strats,
+                     const std::vector<int> &frequencies);
+  void AddStrategies(const std::map<GAStrategy<Gen, Phen>, int> o_strat_counts);
   std::vector<int> GetFitnessRankings() const;
   int GetNStrategies() const;
   void SetFitnessCalculator(std::shared_ptr<FitnessCalculator<Phen>> phen_conv);
@@ -36,12 +40,9 @@ public:
 
 private:
   void Aggregate();
-  void CalculateNStrategies();
-  void AddStrategies(const std::vector<GAStrategy<Gen, Phen>> &sorted_strats,
-                     const std::vector<int> &frequencies);
 
   // Strats are sorted by Genotype
-  std::vector<const GAStrategy<Gen, Phen>> sorted_strats_;
+  std::vector<GAStrategy<Gen, Phen>> sorted_strats_;
   std::vector<int> frequencies_;
   int n_strategies_;
 };
@@ -62,14 +63,16 @@ Population<Gen, Phen>::Population(
     const std::vector<GAStrategy<Gen, Phen>> &sorted_strats,
     const std::vector<int> &frequencies)
     : sorted_strats_(sorted_strats), frequencies_(frequencies) {
-  CalculateNStrategies();
+  n_strategies_ = std::accumulate(frequencies.begin(), frequencies.end(), 0);
 }
 
 template <class Gen, class Phen>
 Population<Gen, Phen> Population<Gen, Phen>::GetPopulation(
     const std::map<int, int> &index_frequencies) const {
-  std::vector<GAStrategy<Gen, Phen>> selected_strats(index_frequencies.size());
-  std::vector<int> selected_frequencies(index_frequencies.size());
+  std::vector<GAStrategy<Gen, Phen>> selected_strats;
+  selected_strats.reserve(index_frequencies.size());
+  std::vector<int> selected_frequencies;
+  selected_frequencies.reserve(index_frequencies.size());
   for (auto pair : index_frequencies) {
     if (pair.second > 0) {
       selected_strats.push_back(sorted_strats_[pair.first]);
@@ -83,7 +86,8 @@ Population<Gen, Phen> Population<Gen, Phen>::GetPopulation(
 template <class Gen, class Phen>
 std::vector<GAStrategy<Gen, Phen>>
 Population<Gen, Phen>::GetStrategies(const std::vector<int> &indices) const {
-  std::vector<GAStrategy<Gen, Phen>> strats(indices.size());
+  std::vector<GAStrategy<Gen, Phen>> strats;
+  strats.reserve(indices.size());
   for (auto i : indices) {
     strats.push_back(sorted_strats_[i]);
   }
@@ -97,9 +101,10 @@ const GAStrategy<Gen, Phen> &Population<Gen, Phen>::operator[](int i) const {
 
 template <class Gen, class Phen>
 std::vector<double> Population<Gen, Phen>::GetUniqueFitnesses() const {
-  std::vector<double> fitnesses(sorted_strats_.size());
-  for (auto strat : sorted_strats_) {
-    fitnesses.push_back(strat.GetFitness());
+  std::vector<double> fitnesses(sorted_strats_.size(), 0);
+  #pragma omp parallel for
+  for (int i = 0; i < sorted_strats_.size(); ++i) {
+    fitnesses[i] = sorted_strats_[i].GetFitness();
   }
   return fitnesses;
 }
@@ -118,14 +123,7 @@ std::vector<int> Population<Gen, Phen>::GetFrequencies() const {
 template <class Gen, class Phen>
 void Population<Gen, Phen>::AddStrategies(
     std::vector<GAStrategy<Gen, Phen>> strats) {
-  auto other_map = VectorToFrequencies(strats);
-  std::vector<GAStrategy<Gen, Phen>> o_sorted_strats(other_map.size());
-  std::vector<int> o_frequencies(other_map.size());
-  for (auto pair : other_map) {
-    o_sorted_strats.push_back(pair.first);
-    o_frequencies.push_back(pair.second);
-  }
-  AddStrategies(o_sorted_strats, o_frequencies);
+  AddStrategies(VectorToCounts(strats));
 }
 
 template <class Gen, class Phen>
@@ -135,46 +133,23 @@ void Population<Gen, Phen>::AddStrategies(const Population<Gen, Phen> &pop) {
 
 template <class Gen, class Phen>
 void Population<Gen, Phen>::AddStrategies(
-    const std::vector<GAStrategy<Gen, Phen>> &o_sorted_strats,
-    const std::vector<int> &o_frequencies) {
-  std::vector<GAStrategy<Gen, Phen>> new_strats(sorted_strats_.size() +
-                                                o_sorted_strats.size());
-  std::vector<int> new_frequencies(frequencies_.size() + o_frequencies.size());
-  int i = 0;
-  int j = 0;
-  while (j < o_sorted_strats && i < sorted_strats_.size()) {
-    if (sorted_strats_[i] < o_sorted_strats[j]) {
-      new_strats.push_back(sorted_strats_[i]);
-      new_frequencies.push_back(frequencies_[i]);
-      ++i;
-    } else if (o_sorted_strats[j] < sorted_strats_[i]) {
-      new_strats.push_back(o_sorted_strats[j]);
-      new_frequencies.push_back(o_frequencies[j]);
-      ++j;
-    } else {
-      new_strats.push_back(sorted_strats_[i]);
-      new_frequencies.push_back(frequencies_[i] + o_frequencies[j]);
-      ++i;
-      ++j;
-    }
-  }
+    const std::vector<GAStrategy<Gen, Phen>> &strats,
+    const std::vector<int> &frequencies) {
+  AddStrategies(VectorToCounts(strats, frequencies));
+}
 
-  if (j < o_sorted_strats.size()) {
-    for (; j < o_sorted_strats.size(); ++j) {
-      new_strats.push_back(o_sorted_strats[j]);
-      new_frequencies.push_back(o_frequencies[j]);
-    }
+template <class Gen, class Phen>
+void Population<Gen, Phen>::AddStrategies(
+    const std::map<GAStrategy<Gen, Phen>, int> o_strat_counts) {
+  auto strat_counts = VectorToCounts(sorted_strats_, frequencies_);
+  auto merged_counts = MergeCounts(strat_counts, o_strat_counts);
+  sorted_strats_.clear();
+  frequencies_.clear();
+  for (auto pair : merged_counts) {
+    sorted_strats_.push_back(pair.first);
+    frequencies_.push_back(pair.second);
   }
-  if (i < sorted_strats_.size()) {
-    for (; i < sorted_strats_.size(); ++i) {
-      new_strats.push_back(sorted_strats_[i]);
-      new_frequencies.push_back(frequencies_[i]);
-    }
-  }
-  sorted_strats_ = std::move(new_strats);
-  frequencies_ = std::move(new_frequencies);
-  n_strategies_ +=
-      std::accumulate(o_frequencies.begin(), o_frequencies.end(), 0);
+  n_strategies_ = std::accumulate(frequencies_.begin(), frequencies_.end(), 0);
 }
 
 template <class Gen, class Phen>
@@ -189,8 +164,8 @@ int Population<Gen, Phen>::GetNStrategies() const {
 
 template <class Gen, class Phen> void Population<Gen, Phen>::Aggregate() {
   auto sorted_map = AggregateUnique(sorted_strats_, frequencies_);
-  sorted_strats_ = std::vector<GAStrategy<Gen, Phen>>(sorted_map.size());
-  frequencies_ = std::vector<GAStrategy<Gen, Phen>>(sorted_map.size());
+  sorted_strats_.clear();
+  frequencies_.clear();
   for (auto pair : sorted_map) {
     sorted_strats_.push_back(pair.first);
     frequencies_.push_back(pair.second);
