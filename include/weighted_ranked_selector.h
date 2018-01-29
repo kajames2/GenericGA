@@ -15,12 +15,13 @@ public:
   explicit WeightedRankedSelector(double weight, int seed)
       : weight_(weight), RankedSelector<Gen, Phen>(seed) {}
   std::vector<double>
-  CalculateWeights(Population<Gen, Phen> *pop) const override {
+  CalculateWeights(const Population<Gen, Phen> &pop) const override {
     auto ranks = CalculateAverageRanks(pop);
-    int size = pop->GetNStrategies();
-    std::vector<double> out_vec(ranks->size());
+    int size = pop.GetNStrategies();
+    std::vector<double> out_vec(ranks.size());
     for (auto rank : ranks) {
-      out_vec.push_back((1 - weight_) / size + (2 * rank * weight_) / (size * (size - 1)));
+      out_vec.push_back((1 - weight_) / size +
+                        (2 * rank * weight_) / (size * (size - 1)));
     }
     return out_vec;
   }

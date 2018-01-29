@@ -27,6 +27,8 @@ private:
   int n_strategies_;
   int n_children_;
 
+  std::shared_ptr<PhenotypeConverter<Gen, Phen>> phen_conv_;
+  std::shared_ptr<FitnessCalculator<Phen>> fit_calc_;
   std::unique_ptr<StrategySelector<Gen, Phen>> survivor_selector_;
   std::unique_ptr<ChildrenFactory<Gen, Phen>> children_fact_;
 };
@@ -37,7 +39,8 @@ SinglePopulationGA<Gen, Phen>::SinglePopulationGA(
     std::unique_ptr<StrategySelector<Gen, Phen>> survivor_selector,
     std::unique_ptr<ChildrenFactory<Gen, Phen>> children_fact)
     : pop_(init_pop), survivor_selector_(std::move(survivor_selector)),
-      children_fact_(std::move(children_fact)) {}
+      children_fact_(std::move(children_fact)), phen_conv_(nullptr),
+      fit_calc_(nullptr) {}
 
 template <class Gen, class Phen>
 void SinglePopulationGA<Gen, Phen>::RunRound() {
@@ -56,13 +59,15 @@ void SinglePopulationGA<Gen, Phen>::RunRound(int n) {
 template <class Gen, class Phen>
 void SinglePopulationGA<Gen, Phen>::SetFitnessCalculator(
     std::shared_ptr<FitnessCalculator<Phen>> fit_calc) {
-  pop_.SetFitnessCalculator(fit_calc);
+  fit_calc_ = fit_calc;
+  pop_.SetFitnessCalculator(fit_calc.get());
 }
 
 template <class Gen, class Phen>
 void SinglePopulationGA<Gen, Phen>::SetPhenotypeConverter(
     std::shared_ptr<PhenotypeConverter<Gen, Phen>> phen_conv) {
-  pop_.SetPhenotypeConverter(phen_conv);
+  phen_conv_ = phen_conv;
+  pop_.SetPhenotypeConverter(phen_conv.get());
 }
 } // namespace genericga
 

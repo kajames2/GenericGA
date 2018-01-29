@@ -14,11 +14,12 @@ template <class Gen, class Phen>
 class RouletteZeroedSelector : public RouletteSelector<Gen, Phen> {
 public:
   RouletteZeroedSelector() : RouletteSelector<Gen, Phen>() {}
-  explicit RouletteZeroedSelector(int seed) : RouletteSelector<Gen, Phen>(seed) {}
+  explicit RouletteZeroedSelector(int seed)
+      : RouletteSelector<Gen, Phen>(seed) {}
 
-  virtual std::vector<double>
-  CalculateWeights(Population<Gen, Phen> *pop) const override {
-    auto weights = pop->GetUniqueFitnesses();
+  std::vector<double>
+  CalculateWeights(const Population<Gen, Phen> &pop) const override {
+    auto weights = pop.GetUniqueFitnesses();
     auto min = std::min_element(std::begin(weights), std::end(weights));
     for (auto it = weights.begin(); it != weights.end(); ++it) {
       *it -= *min;

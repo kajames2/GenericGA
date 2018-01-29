@@ -23,7 +23,7 @@ public:
     auto weights = CalculateWeights(pop);
     auto base_weights = pop.GetFrequencies();
     for (int i = 0; i < weights.size(); ++i) {
-      weights[i] *= base_weights[i];
+      weights[i] *= std::max(0, base_weights[i]);
     }
     std::discrete_distribution<> dist(weights.begin(), weights.end());
     std::vector<int> ind_vec;

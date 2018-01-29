@@ -17,9 +17,9 @@ public:
   explicit SimpleRouletteSelector(int seed)
       : RouletteSelector<Gen, Phen>(seed) {}
 
-  virtual std::vector<double>
-  CalculateWeights(Population<Gen, Phen> *pop) const override {
-    return pop->GetUniqueFitnesses();
+  std::vector<double>
+  CalculateWeights(const Population<Gen, Phen> &pop) const override {
+    return pop.GetUniqueFitnesses();
   }
 };
 } // namespace genericga

@@ -16,11 +16,12 @@ public:
       : tourn_size_(tourn_size), gen_(std::random_device()()) {}
   TournamentSelector(int tourn_size, int seed)
       : tourn_size_(tourn_size), gen_(seed) {}
-  std::vector<int> SelectIndices(Population<Gen, Phen> *pop, int n) override {
-    auto fitnesses = pop->GetUniqueFitnesses();
-    auto counts = pop->GetCounts();
+  std::vector<int> SelectIndices(const Population<Gen, Phen> &pop, int n) override {
+    auto fitnesses = pop.GetUniqueFitnesses();
+    auto counts = pop.GetFrequencies();
     dist = std::discrete_distribution<>(counts.begin(), counts.end());
-    std::vector<int> ind_vec(n);
+    std::vector<int> ind_vec;
+    ind_vec.reserve(n);
     for (int i = 0; i < n; ++i) {
       ind_vec.push_back(TournamentRound(fitnesses));
     }
@@ -28,7 +29,7 @@ public:
   }
 
   int TournamentRound(const std::vector<double> &fitnesses) {
-    return TournamentRound(GenerateTournamentIndices());
+    return TournamentRound(fitnesses, GenerateTournamentIndices());
   }
 
   int TournamentRound(const std::vector<double> &fitnesses,

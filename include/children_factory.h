@@ -14,11 +14,12 @@ public:
   ChildrenFactory(std::shared_ptr<Crossover<Gen>> crossover,
                   std::shared_ptr<Mutator<Gen>> mutator,
                   std::shared_ptr<StrategySelector<Gen, Phen>> parent_selector);
-  std::vector<GAStrategy<Gen, Phen>> GetChildren(const Population<Gen, Phen> &pop_,
-                                    int n_children_);
+  std::vector<GAStrategy<Gen, Phen>>
+  GetChildren(const Population<Gen, Phen> &pop_, int n_children_);
 
   void ConductCrossover(std::vector<GAStrategy<Gen, Phen>> *children);
   void ConductMutation(std::vector<GAStrategy<Gen, Phen>> *children);
+
 private:
   std::shared_ptr<Crossover<Gen>> crossover_;
   std::shared_ptr<Mutator<Gen>> mutator_;
@@ -37,27 +38,31 @@ template <class Gen, class Phen>
 std::vector<GAStrategy<Gen, Phen>>
 ChildrenFactory<Gen, Phen>::GetChildren(const Population<Gen, Phen> &pop_,
                                         int n_children_) {
-  auto children = parent_selector_.SelectStrategies(pop_, n_children_);
+  auto children = parent_selector_->SelectStrategies(pop_, n_children_);
   ConductCrossover(&children);
   ConductMutation(&children);
   return children;
 }
 
 template <class Gen, class Phen>
-void ChildrenFactory<Gen,Phen>::ConductCrossover(std::vector<GAStrategy<Gen, Phen>> *children) {
+void ChildrenFactory<Gen, Phen>::ConductCrossover(
+    std::vector<GAStrategy<Gen, Phen>> *children) {
   for (int i = 0; i < children->size() - 1; i += 2) {
     Gen gen1 = (*children)[i].GetGenotype();
     Gen gen2 = (*children)[i + 1].GetGenotype();
     crossover_->Cross(&gen1, &gen2);
     (*children)[i].SetGenotype(gen1);
-    (*children)[i+1].SetGenotype(gen2);
+    (*children)[i + 1].SetGenotype(gen2);
   }
 }
 
 template <class Gen, class Phen>
-void ChildrenFactory<Gen,Phen>::ConductMutation(std::vector<GAStrategy<Gen, Phen>> *children) {
-  for (auto child : *children) {
-    child->SetGenotype(mutator_->Mutate(child->GetGenotype()));
+void ChildrenFactory<Gen, Phen>::ConductMutation(
+    std::vector<GAStrategy<Gen, Phen>> *children) {
+  for (GAStrategy<Gen, Phen> &child : *children) {
+    Gen gen = child.GetGenotype();
+    mutator_->Mutate(&gen);
+    child.SetGenotype(gen);
   }
 }
 

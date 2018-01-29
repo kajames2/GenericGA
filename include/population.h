@@ -10,7 +10,6 @@
 #include <memory>
 #include <numeric>
 #include <vector>
-#include <iostream>
 
 namespace genericga {
 
@@ -34,9 +33,8 @@ public:
   void AddStrategies(const std::map<GAStrategy<Gen, Phen>, int> o_strat_counts);
   std::vector<int> GetFitnessRankings() const;
   int GetNStrategies() const;
-  void SetFitnessCalculator(std::shared_ptr<FitnessCalculator<Phen>> phen_conv);
-  void SetPhenotypeConverter(
-      std::shared_ptr<PhenotypeConverter<Gen, Phen>> phen_conv);
+  void SetFitnessCalculator(FitnessCalculator<Phen> *phen_conv);
+  void SetPhenotypeConverter(PhenotypeConverter<Gen, Phen> *phen_conv);
 
 private:
   void Aggregate();
@@ -102,7 +100,7 @@ const GAStrategy<Gen, Phen> &Population<Gen, Phen>::operator[](int i) const {
 template <class Gen, class Phen>
 std::vector<double> Population<Gen, Phen>::GetUniqueFitnesses() const {
   std::vector<double> fitnesses(sorted_strats_.size(), 0);
-  #pragma omp parallel for
+#pragma omp parallel for
   for (int i = 0; i < sorted_strats_.size(); ++i) {
     fitnesses[i] = sorted_strats_[i].GetFitness();
   }
@@ -174,7 +172,7 @@ template <class Gen, class Phen> void Population<Gen, Phen>::Aggregate() {
 
 template <class Gen, class Phen>
 void Population<Gen, Phen>::SetFitnessCalculator(
-    std::shared_ptr<FitnessCalculator<Phen>> fit_calc) {
+    FitnessCalculator<Phen> *fit_calc) {
   for (auto strat : sorted_strats_) {
     strat.SetFitnessCalculator(fit_calc);
   }
@@ -182,7 +180,7 @@ void Population<Gen, Phen>::SetFitnessCalculator(
 
 template <class Gen, class Phen>
 void Population<Gen, Phen>::SetPhenotypeConverter(
-    std::shared_ptr<PhenotypeConverter<Gen, Phen>> phen_conv) {
+    PhenotypeConverter<Gen, Phen> *phen_conv) {
   for (auto strat : sorted_strats_) {
     strat.SetPhenotypeConverter(phen_conv);
   }
