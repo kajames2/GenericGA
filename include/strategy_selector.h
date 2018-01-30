@@ -12,7 +12,6 @@ namespace genericga {
 
 template <class Gen, class Phen> class StrategySelector {
 public:
-public:
   virtual Population<Gen, Phen>
   SelectPopulation(const Population<Gen, Phen> &pop, int n);
   virtual std::vector<GAStrategy<Gen, Phen>>

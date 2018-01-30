@@ -78,9 +78,9 @@ TEST_F(VectorOpsTest, CountsToVectorTest) {
   ASSERT_EQ(3, expanded_vec[4]);
 }
 
-TEST_F(VectorOpsTest, MergeCountsTest) {
-  auto merged = genericga::MergeCounts(map, map2);
-  auto it = merged.begin();
+TEST_F(VectorOpsTest, AddFrequenciesTest) {
+genericga::AddFrequencies(&map, &map2);
+  auto it = map.begin();
   ++it;
   ++it;
   ASSERT_EQ(3, it->first);

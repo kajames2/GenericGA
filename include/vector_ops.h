@@ -2,10 +2,10 @@
 #define _VECTOR_OPS_H_
 
 #include <algorithm>
+#include <iostream>
 #include <map>
 #include <numeric>
 #include <vector>
-#include <iostream>
 
 namespace genericga {
 template <class T> std::vector<int> GetOrderings(const std::vector<T> &vec);
@@ -22,8 +22,7 @@ std::map<T, int> VectorToCounts(const std::vector<T> &vec,
 template <class T>
 std::vector<T> CountsToVector(const std::map<T, int> &value_counts);
 template <class T>
-std::map<T, int> MergeCounts(const std::map<T, int> &map1,
-                             const std::map<T, int> &map2);
+void AddFrequencies(std::map<T, int> *map1, std::map<T, int> *map2);
 
 template <class T> std::vector<int> GetOrderings(const std::vector<T> &vec) {
   std::vector<int> indices(vec.size());
@@ -98,36 +97,14 @@ std::vector<T> CountsToVector(const std::map<T, int> &value_counts) {
 }
 
 template <class T>
-std::map<T, int> MergeCounts(const std::map<T, int> &map1,
-                             const std::map<T, int> &map2) {
-  std::map<T, int> merged;
-  auto it1 = map1.begin();
-  auto it2 = map2.begin();
-  while (it1 != map1.end() && it2 != map2.end()) {
-    if (it1->first < it2->first) {
-      merged.emplace(*it1);
-      ++it1;
-    } else if (it1->first > it2->first) {
-      merged.emplace(*it2);
-      ++it2;
+void AddFrequencies(std::map<T, int> *map1, std::map<T, int> *map2) {
+  for (auto it = map2->begin(); it != map2->end(); ++it) {
+    if (map1->find(it->first) != map1->end()) {
+      (*map1)[it->first] += it->second;
     } else {
-      merged.emplace(it1->first, it1->second + it2->second);
-      ++it1;
-      ++it2;
+      map1->emplace(std::move(*it));
     }
   }
-
-  while (it1 != map1.end()) {
-    merged.emplace(*it1);
-    ++it1;
-  }
-
-  while (it2 != map2.end()) {
-    merged.emplace(*it2);
-    ++it2;
-  }
-
-  return merged;
 }
 
 } // namespace genericga
