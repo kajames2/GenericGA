@@ -1,0 +1,13 @@
+#ifndef _GENERICGA_MUTATOR_H_
+#define _GENERICGA_MUTATOR_H_
+
+namespace genericga {
+
+template <class Gen>
+class Mutator {
+ public:
+  virtual void Mutate(Gen *genotype);
+};
+}  // namespace genericga
+
+#endif  // _GENERICGA_MUTATOR_H_

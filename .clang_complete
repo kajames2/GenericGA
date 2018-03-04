@@ -1,4 +1,5 @@
 -Iinclude
+-Itest
 -lgtest
 -lgtest_main
 -lpthread

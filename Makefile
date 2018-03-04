@@ -11,7 +11,7 @@ TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(BUILDDIR)/%,$(TESTS:.$(SRCEXT)=.o))
 CFLAGS := -std=c++14 -O3 -flto -fopenmp
 LFLAGS := -std=c++14 -O3 -flto -fopenmp=libiomp5
 LIB := -lgtest -lgtest_main -lpthread 
-INC := -I include
+INC := -I include -I test
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."

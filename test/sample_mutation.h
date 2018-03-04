@@ -1,7 +1,7 @@
 #ifndef _SAMPLE_MUTATION_H_
 #define _SAMPLE_MUTATION_H_
 
-#include "mutator.h"
+#include "genericga/mutator.h"
 
 namespace gatests {
 
