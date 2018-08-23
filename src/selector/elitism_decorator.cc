@@ -4,18 +4,19 @@
 #include <vector>
 
 #include "genericga/fitness_collection.h"
-#include "genericga/selector/abstract_selector.h"
+#include "genericga/selector.h"
 #include "genericga/selector/keep_best.h"
 
 namespace genericga {
 namespace selector {
 
-ElitismDecorator::ElitismDecorator(std::unique_ptr<AbstractSelector> sel, int n_elites)
+ElitismDecorator::ElitismDecorator(std::unique_ptr<Selector> sel, int n_elites)
     : sel_(std::move(sel)),
       n_elites_(n_elites),
       elite_sel_(std::make_unique<KeepBest>()) {}
 
-std::vector<int> ElitismDecorator::SelectIndices(const FitnessCollection& col, int n) {
+std::vector<int> ElitismDecorator::SelectIndices(const FitnessCollection& col,
+                                                 int n) {
   int actual_n_elites = std::min(n, n_elites_);
   auto elites = elite_sel_->SelectIndices(col, actual_n_elites);
   auto rest = sel_->SelectIndices(col, n - actual_n_elites);

@@ -7,11 +7,11 @@
 namespace genericga {
 namespace selector {
 
-std::vector<double> RankedWeighted::CalculateWeights(
+std::vector<float> RankedWeighted::CalculateWeights(
     const FitnessCollection& col) const {
   auto ranks = col.GetFitnessRankings();
   int size = ranks.size();
-  std::vector<double> out_vec(size);
+  std::vector<float> out_vec(size);
   for (int i = 0; i < size; ++i) {
     out_vec[i] = ((1 - weight_) / size +
                   (2 * ranks[i] * weight_) / (size * (size - 1)));

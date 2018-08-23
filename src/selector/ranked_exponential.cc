@@ -9,11 +9,11 @@
 namespace genericga{
 namespace selector{
 
-std::vector<double> RankedExponential::CalculateWeights(
+std::vector<float> RankedExponential::CalculateWeights(
     const FitnessCollection& col) const {
   auto ranks = col.GetFitnessRankings();
   std::transform(ranks.begin(), ranks.end(), ranks.begin(),
-                 [](double rank) -> double { return 1 - std::exp(-rank); });
+                 [](float rank) -> float { return 1 - std::exp(-rank); });
   return ranks;
 }
 

@@ -3,10 +3,11 @@
 
 namespace genericga {
 
+//  Mixes two genotypes together.
 template <class Gen>
 class Crossover {
  public:
-  virtual void Cross(Gen *genotype1, Gen *genotype2);
+  virtual void operator()(Gen& genotype1, Gen& genotype2);
 };
 }  // namespace genericga
 

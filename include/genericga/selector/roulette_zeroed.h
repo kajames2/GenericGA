@@ -14,7 +14,7 @@ class RouletteZeroed : public Roulette {
   RouletteZeroed() : Roulette() {}
   explicit RouletteZeroed(int seed) : Roulette(seed) {}
 
-  std::vector<double> CalculateWeights(
+  std::vector<float> CalculateWeights(
       const FitnessCollection& col) const override;
 };
 

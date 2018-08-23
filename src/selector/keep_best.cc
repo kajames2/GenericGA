@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "genericga/fitness_calculator.h"
+#include "genericga/fitness_collection.h"
 
 namespace genericga {
 namespace selector {

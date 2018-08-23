@@ -5,16 +5,15 @@
 
 namespace gatests {
 
-class SampleCrossover
-    : public genericga::Crossover<int> {
-public:
-  void Cross(int *gen1, int *gen2) override {
-    int avg = (*gen1 + *gen2)/2;
-    *gen1 = avg;
-    *gen2 = avg;
+class SampleCrossover : public genericga::Crossover<int> {
+ public:
+  void operator()(int &gen1, int &gen2) override {
+    int avg = (gen1 + gen2) / 2;
+    gen1 = avg;
+    gen2 = avg;
   }
 };
 
-} // namespace gatests
+}  // namespace gatests
 
-#endif // _SAMPLE_CROSSOVER_H_
+#endif  // _SAMPLE_CROSSOVER_H_

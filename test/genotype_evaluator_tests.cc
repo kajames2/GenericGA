@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "genericga/fitness_calculator.h"
 #include "genericga/genotype_evaluator.h"
+#include "genericga/phenotype_strategy.h"
 #include "sample_fitness_calculator.h"
 #include "sample_phenotype_converter.h"
 
@@ -11,48 +11,36 @@ namespace gatests {
 
 class GenotypeEvaluatorTest : public ::testing::Test {
  public:
-  GenotypeEvaluatorTest() : gene_eval(std::make_unique<SamplePhenotypeConverter>(100)) {}
+  GenotypeEvaluatorTest()
+      : gene_eval(SamplePhenotypeConverter(100), SampleFitnessCalculator(5)) {}
 
  protected:
-  virtual void SetUp() {
-    fit_calc = std::make_unique<SampleFitnessCalculator>(5);
-    genes = std::vector<int>{1, 4, 9, 1, 3, 3, 1};
-    genes2 = std::vector<int>{1, 4, 9, 1, 8};
-  }
-  std::vector<int> genes, genes2;
-  std::unique_ptr<const SampleFitnessCalculator> fit_calc;
+  virtual void SetUp() {}
   genericga::GenotypeEvaluator<int, int> gene_eval;
 };
 
-TEST_F(GenotypeEvaluatorTest, UpdateWhenEmptyTest) {
-  gene_eval.Update(genes);
-  ASSERT_EQ(-1, gene_eval.GetFitness(3));
-  ASSERT_EQ(-1, gene_eval.GetFitness(9));
-  ASSERT_ANY_THROW(gene_eval.GetFitness(8));
+TEST_F(GenotypeEvaluatorTest, GetFitnessTest) {
+  EXPECT_EQ(24, gene_eval.GetFitness(9));
 }
 
-TEST_F(GenotypeEvaluatorTest, UpdateAddTest) {
-  gene_eval.Update(genes);
-  gene_eval.Update(genes2);
-  ASSERT_EQ(-1, gene_eval.GetFitness(8));
+TEST_F(GenotypeEvaluatorTest, GetFitnessesTest) {
+  std::vector<float> exp_fits{24, 80, 69};
+  EXPECT_EQ(exp_fits, gene_eval.GetFitnesses(std::vector<int>{9, 5, 6}));
 }
 
-TEST_F(GenotypeEvaluatorTest, UpdateRemoveTest) {
-  gene_eval.Update(genes);
-  gene_eval.Update(genes2);
-  ASSERT_ANY_THROW(gene_eval.GetFitness(3));
+TEST_F(GenotypeEvaluatorTest, GetPhenotypeTest) {
+  EXPECT_EQ(19, gene_eval.GetPhenotype(9));
 }
 
-TEST_F(GenotypeEvaluatorTest, UpdateWithFitnessTest) {
-  gene_eval.SetFitnessCalculator(std::move(fit_calc));
-  gene_eval.Update(genes);
-  ASSERT_EQ(24, gene_eval.GetFitness(9));
+TEST_F(GenotypeEvaluatorTest, GetPhenotypeFitnessTest) {
+  EXPECT_EQ(14, gene_eval.GetPhenotypeFitness(9));
 }
 
-TEST_F(GenotypeEvaluatorTest, SetFitnessTest) {
-  gene_eval.Update(genes);
-  gene_eval.SetFitnessCalculator(std::move(fit_calc));
-  ASSERT_EQ(24, gene_eval.GetFitness(9));
+TEST_F(GenotypeEvaluatorTest, GetPhenotypeStrategyTest) {
+  genericga::PhenotypeStrategy<int> strat{19, 24};
+  auto res = gene_eval.GetPhenotypeStrategy(9);
+  EXPECT_EQ(strat.phenotype, res.phenotype);
+  EXPECT_EQ(strat.fitness, res.fitness);
 }
 
 }  // namespace gatests

@@ -23,9 +23,9 @@ protected:
 TEST_F(RankedExponentialTest, CalculateWeightsTest) {
   auto vec = sel->CalculateWeights(pop);
   ASSERT_EQ(4, vec.size());
-  ASSERT_DOUBLE_EQ(1-std::exp(-1), vec[0]);
-  ASSERT_EQ(1-std::exp(-3), vec[2]);
-  ASSERT_EQ(1-std::exp(0), vec[3]);
+  ASSERT_FLOAT_EQ(1-std::exp(-1), vec[0]);
+  ASSERT_FLOAT_EQ(1-std::exp(-3), vec[2]);
+  ASSERT_FLOAT_EQ(1-std::exp(0), vec[3]);
 }
 
 } // namespace gatests

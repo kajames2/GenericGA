@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "genericga/fitness_collection.h"
-#include "genericga/selector/abstract_selector.h"
+#include "genericga/selector.h"
 
 namespace genericga {
 namespace selector {
 
-class KeepBest : public AbstractSelector {
+class KeepBest : public Selector {
  public:
   KeepBest() {}
   std::vector<int> SelectIndices(const FitnessCollection& col, int n) override;

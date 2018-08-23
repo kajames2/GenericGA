@@ -9,15 +9,19 @@ namespace gatests {
 class SampleGenotypePopulation : public genericga::GenotypePopulation<int> {
  public:
   SampleGenotypePopulation()
-      : fits(std::vector<double>{1, 3, 5, -2}), genes(std::vector<int>{6, 7, 8, 2}) {}
-  std::vector<double> GetFitnesses() const override { return fits; }
-  double GetFitness(int i) const override { return fits[i]; }
-  void AddGenotypes(std::vector<int> genes) override {}
-  int GetGenotype(int i) const override { return genes[i]; }
-  std::vector<int> GetGenotypes() const override { return genes; }
+      : fits(std::vector<float>{1, 3, 5, -2}), genes(std::vector<int>{6, 7, 8, 2}) {}
+  std::vector<float> GetFitnesses() const override { return fits; }
+  float GetFitness(int i) const override { return fits[i]; }
 
+  void AddGenotypes(std::vector<int> genotypes) override {}
+  void SetGenotypes(std::vector<int> genotypes) override {}
+  std::vector<int> GetAllGenotypes() const override {return genes;}
+
+ protected:
+  int GetGenotype(int i) const override {return genes[i];}
+  
  private:
-  std::vector<double> fits;
+  std::vector<float> fits;
   std::vector<int> genes;
 };
 }  // namespace gatests

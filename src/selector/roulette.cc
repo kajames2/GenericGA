@@ -3,7 +3,7 @@
 #include <random>
 #include <vector>
 
-#include "genericga/fitness_calculator.h"
+#include "genericga/fitness_collection.h"
 
 namespace genericga {
 namespace selector {
@@ -15,8 +15,8 @@ std::vector<int> Roulette::SelectIndices(const FitnessCollection& col,
                                          int n) {
   auto weights = CalculateWeights(col);
   std::discrete_distribution<> dist(weights.begin(), weights.end());
-  std::vector<int> selected(n);
-  for (auto val : selected) {
+  std::vector<int> selected;
+  for (int i = 0; i < n; ++i) {
     selected.push_back(dist(gen_));
   }
   return selected;

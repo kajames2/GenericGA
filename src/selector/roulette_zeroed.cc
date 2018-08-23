@@ -8,12 +8,12 @@
 namespace genericga {
 namespace selector {
 
-std::vector<double> RouletteZeroed::CalculateWeights(
+std::vector<float> RouletteZeroed::CalculateWeights(
     const FitnessCollection& col) const {
   auto weights = col.GetFitnesses();
   auto min = *std::min_element(std::begin(weights), std::end(weights));
   std::transform(weights.begin(), weights.end(), weights.begin(),
-                 [min](double weight) -> double { return weight - min; });
+                 [min](float weight) -> float { return weight - min; });
   return weights;
 }
 

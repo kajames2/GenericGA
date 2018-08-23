@@ -6,8 +6,8 @@
 
 namespace genericga {
 
-std::vector<double> FitnessCollection::GetFitnessRankings() const {
-  return GetRankingsWithTies(GetFitnesses());
+std::vector<float> FitnessCollection::GetFitnessRankings() const {
+  return GetRankingsWithTies(GetFitnesses(), AverageRank);
 }
 
 std::vector<int> FitnessCollection::GetFitnessOrderings() const {

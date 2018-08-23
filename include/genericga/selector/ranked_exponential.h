@@ -13,7 +13,7 @@ class RankedExponential : public Roulette {
  public:
   RankedExponential() : Roulette() {}
   explicit RankedExponential(int seed) : Roulette(seed) {}
-  std::vector<double> CalculateWeights(
+  std::vector<float> CalculateWeights(
       const FitnessCollection& col) const override;
 };
 

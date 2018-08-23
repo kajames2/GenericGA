@@ -8,8 +8,8 @@ namespace gatests {
 class SampleMutation
     : public genericga::Mutator<int> {
 public:
-  void Mutate(int *gen) override {
-    *gen = (*gen) * (*gen) - 1;
+  void operator()(int &gen) override {
+    gen = gen * gen - 1;
   }
 };
 

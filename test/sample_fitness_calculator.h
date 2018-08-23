@@ -1,14 +1,12 @@
 #ifndef _SAMPLE_FITNESS_CALCULATOR_H_
 #define _SAMPLE_FITNESS_CALCULATOR_H_
 
-#include "genericga/fitness_calculator.h"
-
 namespace gatests {
 
-class SampleFitnessCalculator : public genericga::FitnessCalculator<int> {
+class SampleFitnessCalculator {
 public:
   explicit SampleFitnessCalculator(int n) : n_(n) {}
-  double CalculateFitness(const int &phenotype) const override {
+  float operator()(const int &phenotype) const {
     return phenotype + n_;
   }
 

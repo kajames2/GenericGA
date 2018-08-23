@@ -14,7 +14,7 @@ class RouletteSimple : public Roulette {
   RouletteSimple() : Roulette() {}
   explicit RouletteSimple(int seed) : Roulette(seed) {}
 
-  std::vector<double> CalculateWeights(
+  std::vector<float> CalculateWeights(
       const FitnessCollection& col) const override {
     return col.GetFitnesses();
   }

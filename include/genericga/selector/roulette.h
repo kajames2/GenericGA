@@ -5,17 +5,17 @@
 #include <vector>
 
 #include "genericga/fitness_collection.h"
-#include "genericga/selector/abstract_selector.h"
+#include "genericga/selector.h"
 
 namespace genericga {
 namespace selector {
 
-class Roulette : public AbstractSelector {
+class Roulette : public Selector {
  public:
   Roulette();
   explicit Roulette(int seed);
   std::vector<int> SelectIndices(const FitnessCollection& col, int n) override;
-  virtual std::vector<double> CalculateWeights(
+  virtual std::vector<float> CalculateWeights(
       const FitnessCollection& col) const = 0;
 
  private:

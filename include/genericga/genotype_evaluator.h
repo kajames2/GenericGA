@@ -2,93 +2,77 @@
 #define _GENERICGA_GENOTYPE_EVALUATOR_H_
 
 #include <algorithm>
-#include <map>
-#include <set>
+#include <cassert>
+#include <memory>
 #include <vector>
 
-#include "genericga/fitness_calculator.h"
-#include "genericga/ga_strategy.h"
-#include "genericga/phenotype_converter.h"
+#include "genericga/abstract_genotype_evaluator.h"
+#include "genericga/phenotype_strategy.h"
 
 namespace genericga {
 
 template <class Gen, class Phen>
-class GenotypeEvaluator {
+class GenotypeEvaluator : public AbstractGenotypeEvaluator<Gen> {
  public:
-  GenotypeEvaluator(std::unique_ptr<const PhenotypeConverter<Gen, Phen>>);
-  void Update(const std::vector<Gen>& genotypes);
-  void SetFitnessCalculator(
-      std::unique_ptr<const FitnessCalculator<Phen>> fit_calc);
-
-  std::vector<double> GetFitnesses(const std::vector<Gen>& genes) const;
-  const GAStrategy<Phen>& GetStrategy(const Gen& gene) const;
-  double GetFitness(const Gen& gene) const;
+  GenotypeEvaluator(std::function<Phen(const Gen&)> phen_conv,
+                    std::function<float(const Phen&)> fit_calc =
+                        [](const Phen&) { return -1.0; });
+  void SetFitnessCalculator(std::function<float(const Phen&)> fit_calc);
+  float GetFitness(const Gen& gene) const override;
+  std::vector<float> GetFitnesses(const std::vector<Gen>& genes) const override;
+  Phen GetPhenotype(const Gen& gene) const;
+  float GetPhenotypeFitness(const Phen& phen) const;
+  PhenotypeStrategy<Phen> GetPhenotypeStrategy(const Gen& gene) const;
 
  private:
-  GAStrategy<Phen> GenerateStrategy(const Gen& gene) const;
-
-  std::map<Gen, GAStrategy<Phen>> strats_;
-  std::unique_ptr<const FitnessCalculator<Phen>> fit_calc_;
-  std::unique_ptr<const PhenotypeConverter<Gen, Phen>> phen_conv_;
+  std::function<Phen(const Gen&)> phen_conv_;
+  std::function<float(const Phen&)> fit_calc_;
 };
 
 template <class Gen, class Phen>
 GenotypeEvaluator<Gen, Phen>::GenotypeEvaluator(
-    std::unique_ptr<const PhenotypeConverter<Gen, Phen>> phen_conv)
-    : phen_conv_(std::move(phen_conv)), fit_calc_(nullptr) {}
-
-// Parallelize later.
-template <class Gen, class Phen>
-void GenotypeEvaluator<Gen, Phen>::Update(const std::vector<Gen>& genes) {
-  std::set<Gen> uniques(genes.begin(), genes.end());
-  std::map<Gen, GAStrategy<Phen>> new_strats;
-  for (auto& gene : uniques) {
-    auto el = strats_.find(gene);
-    if (el == strats_.end()) {
-      new_strats.emplace(gene, GenerateStrategy(gene));
-    } else {
-      new_strats.emplace(*el);
-    }
-  }
-  strats_ = new_strats;
-}
-
-template <class Gen, class Phen>
-GAStrategy<Phen> GenotypeEvaluator<Gen, Phen>::GenerateStrategy(
-    const Gen& gene) const {
-  Phen phen = phen_conv_->Convert(gene);
-  return fit_calc_ ? GAStrategy<Phen>{phen, fit_calc_->CalculateFitness(phen)}
-                   : GAStrategy<Phen>{phen};
-}
+    std::function<Phen(const Gen&)> phen_conv,
+    std::function<float(const Phen&)> fit_calc)
+    : phen_conv_(phen_conv), fit_calc_(fit_calc) {}
 
 template <class Gen, class Phen>
 void GenotypeEvaluator<Gen, Phen>::SetFitnessCalculator(
-    std::unique_ptr<const FitnessCalculator<Phen>> fit_calc) {
-  fit_calc_ = std::move(fit_calc);
-  for (auto& pair : strats_) {
-    pair.second.fitness = fit_calc_->CalculateFitness(pair.second.phenotype);
-  }
+    std::function<float(const Phen&)> fit_calc) {
+  fit_calc_ = fit_calc;
 }
 
 template <class Gen, class Phen>
-std::vector<double> GenotypeEvaluator<Gen, Phen>::GetFitnesses(
+Phen GenotypeEvaluator<Gen, Phen>::GetPhenotype(const Gen& gene) const {
+  return phen_conv_(gene);
+}
+
+template <class Gen, class Phen>
+float GenotypeEvaluator<Gen, Phen>::GetFitness(const Gen& gene) const {
+  return GetPhenotypeFitness(GetPhenotype(gene));
+}
+
+template <class Gen, class Phen>
+float GenotypeEvaluator<Gen, Phen>::GetPhenotypeFitness(
+    const Phen& phen) const {
+  return fit_calc_(phen);
+}
+
+template <class Gen, class Phen>
+PhenotypeStrategy<Phen> GenotypeEvaluator<Gen, Phen>::GetPhenotypeStrategy(
+    const Gen& gene) const {
+  Phen phen = GetPhenotype(gene);
+  return PhenotypeStrategy<Phen>{phen, GetPhenotypeFitness(phen)};
+}
+
+template <class Gen, class Phen>
+std::vector<float> GenotypeEvaluator<Gen, Phen>::GetFitnesses(
     const std::vector<Gen>& genes) const {
-  std::vector<double> fits(genes.size());
-  for (int i = 0; i < genes.size(); ++i) {
-    fits[i] = strats_.at(genes[i]).fitness;
+  std::vector<float> fits;
+  fits.reserve(genes.size());
+  for (const Gen& gene : genes) {
+    fits.emplace_back(GetFitness(gene));
   }
   return fits;
-}
-
-template <class Gen, class Phen>
-const GAStrategy<Phen>& GenotypeEvaluator<Gen, Phen>::GetStrategy(
-    const Gen& gene) const {
-  return strats_.at(gene);
-}
-
-template <class Gen, class Phen>
-double GenotypeEvaluator<Gen, Phen>::GetFitness(const Gen& gene) const {
-  return strats_.at(gene).fitness;
 }
 
 }  // namespace genericga

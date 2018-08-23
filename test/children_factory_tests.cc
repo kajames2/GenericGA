@@ -28,7 +28,7 @@ class ChildrenFactoryTest : public ::testing::Test {
   SampleGenotypePopulation pop;
 };
 
-TEST_F(ChildrenFactoryTest, InitializedTest) {
+TEST_F(ChildrenFactoryTest, GetChildrenTest) {
   auto children = fact->GetChildren(pop, 2);
   ASSERT_EQ(2, children.size());
   ASSERT_EQ(48, children[0]);

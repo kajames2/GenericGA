@@ -6,7 +6,7 @@ namespace genericga {
 template <class Gen>
 class Mutator {
  public:
-  virtual void Mutate(Gen *genotype);
+  virtual void operator()(Gen &genotype);
 };
 }  // namespace genericga
 

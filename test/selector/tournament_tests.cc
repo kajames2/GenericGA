@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace gatests {
 
@@ -21,8 +21,10 @@ class TournamentSelectorTest : public ::testing::Test {
 };
 
 TEST_F(TournamentSelectorTest, TournamentRoundTest) {
-  ASSERT_EQ(2, sel->TournamentRound(pop, std::vector<int>{0, 2, 2}));
-  ASSERT_EQ(1, sel->TournamentRound(pop, std::vector<int>{0, 3, 1, 0}));
+  ASSERT_EQ(2, sel->TournamentRound(pop.GetFitnessRankings(),
+                                    std::vector<int>{0, 2, 2}));
+  ASSERT_EQ(1, sel->TournamentRound(pop.GetFitnessRankings(),
+                                    std::vector<int>{0, 3, 1, 0}));
 }
 
 }  // namespace gatests

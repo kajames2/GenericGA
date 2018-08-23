@@ -14,14 +14,14 @@ namespace selector {
 // a linear combination of the two
 class RankedWeighted : public Roulette {
  public:
-  RankedWeighted(double weight) : weight_(weight), Roulette() {}
-  explicit RankedWeighted(double weight, int seed)
+  RankedWeighted(float weight) : weight_(weight), Roulette() {}
+  explicit RankedWeighted(float weight, int seed)
       : weight_(weight), Roulette(seed) {}
-  std::vector<double> CalculateWeights(
+  std::vector<float> CalculateWeights(
       const FitnessCollection& col) const override;
 
  private:
-  double weight_;
+  float weight_;
 };
 
 }  // namespace selector
